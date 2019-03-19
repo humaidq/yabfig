@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-  "strings"
 )
 
 type stack []int
