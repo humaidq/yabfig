@@ -1,8 +1,8 @@
 image: golang:latest
 
 variables:
-  REPO_NAME: gitlab.com/humaid/yabfi
-  BINARY: yabfi
+  REPO_NAME: gitlab.com/humaid/yabfig
+  BINARY: yabfig
 
 before_script:
   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)

@@ -25,6 +25,8 @@ func main() {
 			}
 		}
 	} else {
-		fmt.Println("yabfig: usage: yabfig [-lint] [file]")
+		fmt.Println("Usage: yabfig [options] <file>")
+		fmt.Println("Options:")
+		fmt.Println("\t-lint\t\tLint (format) a Brainf--k file by removing spaces and non-instruction characters and output it to standard output.")
 	}
 }
