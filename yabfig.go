@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+  "strings"
 )
 
 type stack []int
@@ -20,6 +21,68 @@ func (s stack) Pop() (stack, int) {
 	return s[:len(s)-1], s[len(s)-1]
 }
 
+const memorySize int = 500
+
+type Interpreter struct{
+  program []byte
+  programPosition int
+  memory [memorySize]int64
+  memoryPosition int
+  bracketMap map[int]int
+}
+
+func (ipr *Interpreter) init() {
+  ipr.memoryPosition = (memorySize/2)
+}
+
+func (ipr *Interpreter) loadProgram(data []byte) {
+  ipr.bracketMap = make(map[int]int)
+  var tempStack stack
+  for i := 0; i < len(data); i++ {
+    if data[i] == '>' || data[i] == '<' || data[i] == '+' ||
+      data[i] == '-' || data[i] == '[' || data[i] == ']' || data[i] == '.' ||
+      data[i] == ',' {
+      ipr.program = append(ipr.program, data[i])
+    }
+    if data[i] == '[' {
+      tempStack = tempStack.Push(len(ipr.program) - 1)
+    } else if data[i] == ']' {
+      var beginning int
+      tempStack, beginning = tempStack.Pop()
+      ipr.bracketMap[beginning] = len(ipr.program) - 1
+      ipr.bracketMap[len(ipr.program)-1] = beginning
+    }
+  }
+  ipr.programPosition = 0
+}
+
+func (ipr *Interpreter) clock() bool {
+  switch ipr.program[ipr.programPosition] {
+  case '>':
+    ipr.memoryPosition++
+  case '<':
+    ipr.memoryPosition--
+  case '+':
+    ipr.memory[ipr.memoryPosition]++
+  case '-':
+    ipr.memory[ipr.memoryPosition]--
+  case '.':
+    fmt.Printf("%c", ipr.memory[ipr.memoryPosition])
+  case ',':
+    fmt.Scanf("%c", &ipr.memory[ipr.memoryPosition])
+  case '[':
+    if ipr.memory[ipr.memoryPosition] == 0 {
+      ipr.programPosition = ipr.bracketMap[ipr.programPosition]
+    }
+  case ']':
+    if ipr.memory[ipr.memoryPosition] != 0 {
+      ipr.programPosition = ipr.bracketMap[ipr.programPosition]
+    }
+  }
+  ipr.programPosition++;
+  return !(ipr.programPosition > len(ipr.program)-2)
+}
+
 func main() {
 	args := os.Args[1:]
 	if len(args) == 1 {
@@ -27,58 +90,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var mem [100]int64
-		var memPos int = (len(mem) / 2)
-		init := func() ([]byte, map[int]int) {
-			bracketmap := make(map[int]int)
-			var tempStack stack
-			var prog []byte
-			for i := 0; i < len(data); i++ {
-				if data[i] == '>' || data[i] == '<' || data[i] == '+' ||
-					data[i] == '-' || data[i] == '[' || data[i] == ']' || data[i] == '.' ||
-					data[i] == ',' {
-					prog = append(prog, data[i])
-				}
-				if data[i] == '[' {
-					tempStack = tempStack.Push(len(prog) - 1)
-				} else if data[i] == ']' {
-					var beginning int
-					tempStack, beginning = tempStack.Pop()
-					bracketmap[beginning] = len(prog) - 1
-					bracketmap[len(prog)-1] = beginning
-				}
-			}
-			return prog, bracketmap
-		}
-		prog, bracketmap := init()
-		progPos := 0
-		for ; ; progPos++ {
-			switch prog[progPos] {
-			case '>':
-				memPos++
-			case '<':
-				memPos--
-			case '+':
-				mem[memPos]++
-			case '-':
-				mem[memPos]--
-			case '.':
-				fmt.Printf("%c", mem[memPos])
-			case ',':
-				fmt.Scanf("%c", &mem[memPos])
-			case '[':
-				if mem[memPos] == 0 {
-					progPos = bracketmap[progPos]
-				}
-			case ']':
-				if mem[memPos] != 0 {
-					progPos = bracketmap[progPos]
-				}
-			}
-			if progPos > len(prog)-2 {
-				break
-			}
-		}
+    ipr := Interpreter{}
+    ipr.init()
+    ipr.loadProgram(data)
+    for ipr.clock() {
+    }
 	} else {
 		fmt.Println("yabfig: usage: yabfig [file]")
 	}
