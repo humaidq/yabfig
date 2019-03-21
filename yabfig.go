@@ -2,31 +2,31 @@ package main
 
 import (
 	"fmt"
+	dbg "gitlab.com/humaid/yabfig/debugger"
 	bf "gitlab.com/humaid/yabfig/interpreter"
-	"io/ioutil"
-	"log"
 	"os"
 )
 
 func main() {
 	args := os.Args[1:]
 	if len(args) > 0 {
-		data, err := ioutil.ReadFile(args[len(args)-1])
-		if err != nil {
-			log.Fatal(err)
-		}
-		ipr := bf.Interpreter{}
-		ipr.Init()
-		ipr.LoadProgram(data)
-		if len(args) > 1 && args[0] == "-lint" {
-			fmt.Printf("%s\n", ipr.Program)
+		if args[0] == "-debug" {
+			dbg := dbg.Debugger{}
+			dbg.SetProgram(args[len(args)-1])
+			dbg.RunDebugger()
 		} else {
-			for ipr.Clock() {
+			ipr := bf.Interpreter{}
+			ipr.Init()
+			ipr.LoadFromFile(args[len(args)-1])
+			if len(args) > 1 && args[0] == "-lint" {
+				fmt.Printf("%s\n", ipr.Program)
+			} else {
+				ipr.Run()
 			}
 		}
 	} else {
 		fmt.Println("Usage: yabfig [options] <file>")
 		fmt.Println("Options:")
-		fmt.Println("\t-lint\t\tLint (format) a Brainf--k file by removing spaces and non-instruction characters and output it to standard output.")
+		fmt.Println("\t-lint\t\tLint (format) a Brainfuck file by removing spaces and non-instruction characters and output it to standard output.")
 	}
 }

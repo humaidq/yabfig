@@ -2,6 +2,7 @@ package interpreter
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 )
@@ -33,9 +34,25 @@ type Interpreter struct {
 	Input           string
 }
 
+// GetProperMemoryPosition returns the corrected
+// memory position from the middle position of the memory array.
+func (ipr *Interpreter) GetProperMemoryPosition() int {
+	return (ipr.MemoryPosition - (memorySize / 2))
+}
+
 // Init initialises an interpreter by resetting the memory position.
 func (ipr *Interpreter) Init() {
 	ipr.MemoryPosition = (memorySize / 2)
+}
+
+// LoadFromFile loads a program to the interpreter from
+// a file path.
+func (ipr *Interpreter) LoadFromFile(path string) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ipr.LoadProgram(data)
 }
 
 // LoadProgram loads a program to the interpreter and
@@ -61,9 +78,27 @@ func (ipr *Interpreter) LoadProgram(data []byte) {
 	ipr.ProgramPosition = 0
 }
 
+// Run runs the program until the it ends.
+func (ipr *Interpreter) Run() {
+	for ipr.Clock() {
+	}
+}
+
+// IsEnded returns whether the program has
+// reached the end or not.
+func (ipr *Interpreter) IsEnded() bool {
+	if ipr.ProgramPosition > len(ipr.Program)-1 {
+		return true
+	}
+	return false
+}
+
 // Clock runs one cycle/tick of the interpreter.
 // It returns false when the program ends.
 func (ipr *Interpreter) Clock() bool {
+	if ipr.IsEnded() {
+		return false
+	}
 	switch ipr.Program[ipr.ProgramPosition] {
 	case '>':
 		ipr.MemoryPosition++
@@ -93,5 +128,5 @@ func (ipr *Interpreter) Clock() bool {
 		}
 	}
 	ipr.ProgramPosition++
-	return !(ipr.ProgramPosition > len(ipr.Program)-1)
+	return true
 }
