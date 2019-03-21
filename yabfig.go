@@ -16,7 +16,6 @@ func main() {
 			dbg.RunDebugger()
 		} else {
 			ipr := bf.Interpreter{}
-			ipr.Init()
 			ipr.LoadFromFile(args[len(args)-1])
 			if len(args) > 1 && args[0] == "-lint" {
 				fmt.Printf("%s\n", ipr.Program)

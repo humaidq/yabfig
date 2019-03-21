@@ -105,6 +105,21 @@ func (dbg *Debugger) RunDebugger() {
 			dbg.running = true
 			dbg.runClocks()
 		} else if inputs[0] == "p" || inputs[0] == "print" {
+      if dbg.running {
+				if len(inputs) > 1 {
+          inputPos, err := strconv.Atoi(inputs[1])
+          if err != nil {
+            fmt.Println("Position must be an integer!")
+            continue
+          }
+          value := dbg.interpreter.GetProperMemoryValue(inputPos)
+          fmt.Printf("$%d = %d (%x)\n", inputPos,value, value)
+        } else {
+          fmt.Println("Not enough arguments for this command!")
+        }
+			} else {
+				fmt.Println("Program is not running!")
+			}
 		} else if inputs[0] == "j" || inputs[0] == "jump" {
 		} else if inputs[0] == "n" || inputs[0] == "next" {
 			if dbg.running {
@@ -131,32 +146,40 @@ func (dbg *Debugger) RunDebugger() {
 				fmt.Println("Program is not running!")
 			}
 		} else if inputs[0] == "b" || inputs[0] == "break" {
-			point, err := strconv.Atoi(inputs[1])
-			if err != nil {
-				fmt.Println("Breakpoint must be an integer!")
-				continue
-			}
-			b, ok := dbg.breakpoints[point]
-			if ok && b {
-				fmt.Printf("Breakpoint already exists at position %d\n", point)
-			} else {
-				dbg.breakpoints[point] = true
-				fmt.Printf("Breakpoint #%d at position %d\n", len(dbg.breakpoints), point)
-			}
+      if len(inputs) > 1 {
+        point, err := strconv.Atoi(inputs[1])
+        if err != nil {
+          fmt.Println("Breakpoint must be an integer!")
+          continue
+        }
+        b, ok := dbg.breakpoints[point]
+        if ok && b {
+          fmt.Printf("Breakpoint already exists at position %d\n", point)
+        } else {
+          dbg.breakpoints[point] = true
+          fmt.Printf("Breakpoint #%d at position %d\n", len(dbg.breakpoints), point)
+        }
+      } else{
+        fmt.Println("Not enough arguments for this command!")
+      }
 		} else if inputs[0] == "d" || inputs[0] == "delete" {
 		} else if inputs[0] == "clear" {
-			point, err := strconv.Atoi(inputs[1])
-			if err != nil {
-				fmt.Println("Breakpoint must be an integer!")
-				continue
-			}
-			b, ok := dbg.breakpoints[point]
-			if ok && b {
-				dbg.breakpoints[point] = false
-				fmt.Printf("Breakpoint cleared at position %d \n", point)
-			} else {
-				fmt.Printf("A breakpoint does not exist at position %d\n", point)
-			}
+      if len(inputs) > 1 {
+        point, err := strconv.Atoi(inputs[1])
+        if err != nil {
+          fmt.Println("Breakpoint must be an integer!")
+          continue
+        }
+        b, ok := dbg.breakpoints[point]
+        if ok && b {
+          dbg.breakpoints[point] = false
+          fmt.Printf("Breakpoint cleared at position %d \n", point)
+        } else {
+          fmt.Printf("A breakpoint does not exist at position %d\n", point)
+        }
+      } else{
+        fmt.Println("Not enough arguments for this command!")
+      }
 		} else if inputs[0] == "watch" {
 		} else if inputs[0] == "kill" {
 		} else if inputs[0] == "" || len(inputs) == 0 {

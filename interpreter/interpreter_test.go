@@ -7,7 +7,6 @@ import (
 func TestHelloWorld(t *testing.T) {
 	program := "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
 	ipr := Interpreter{}
-	ipr.Init()
 	ipr.LoadProgram([]byte(program))
 	for ipr.Clock() {
 	}
@@ -20,7 +19,6 @@ func TestHelloWorld(t *testing.T) {
 func TestRot13(t *testing.T) {
 	program := "-,+[-[>>++++[>++++++++<-]<+<-[>+>+>-[>>>]<[[>+<-]>>+>]<<<<<-]]>>>[-]+>--[-[<->+++[-]]]<[++++++++++++<[>-[>+>>]>[+[<+>-]>+>>]<<<<<-]>>[<+>-]>[-[-<<[-]>>]<<[<<->>-]>>]<<[<<+>>-]]<[-]<.[-]<-,+]"
 	ipr := Interpreter{}
-	ipr.Init()
 	ipr.LoadProgram([]byte(program))
 	ipr.Input = "Hello rot13! "
 	for ipr.Clock() {

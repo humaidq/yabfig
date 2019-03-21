@@ -40,9 +40,10 @@ func (ipr *Interpreter) GetProperMemoryPosition() int {
 	return (ipr.MemoryPosition - (memorySize / 2))
 }
 
-// Init initialises an interpreter by resetting the memory position.
-func (ipr *Interpreter) Init() {
-	ipr.MemoryPosition = (memorySize / 2)
+// GetProperMemoryValue returns a value from memory
+// using a corrected memory position.
+func (ipr *Interpreter) GetProperMemoryValue(pos int) int {
+  return int(ipr.Memory[pos+(memorySize/2)])
 }
 
 // LoadFromFile loads a program to the interpreter from
@@ -58,6 +59,7 @@ func (ipr *Interpreter) LoadFromFile(path string) {
 // LoadProgram loads a program to the interpreter and
 // builds a bracket map.
 func (ipr *Interpreter) LoadProgram(data []byte) {
+	ipr.MemoryPosition = (memorySize / 2)
 	ipr.bracketMap = make(map[int]int)
 	var tempStack stack
 	for i := 0; i < len(data); i++ {
