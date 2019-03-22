@@ -94,12 +94,16 @@ func (dbg *Debugger) checkIfRunning() {
 	}
 }
 
+func (dbg *Debugger) init() {
+	dbg.breakpoints = make(map[int]bool)
+	dbg.watchpoints = make(map[int]expression)
+}
+
 // RunDebugger starts the interactive debugger.
 func (dbg *Debugger) RunDebugger() {
 	fmt.Println("yabfig debugger for Brainfuck.\nCommands are similar to gdb, type \"help\" for a list of compatible commands.")
 	scanner := bufio.NewScanner(os.Stdin)
-	dbg.breakpoints = make(map[int]bool)
-	dbg.watchpoints = make(map[int]expression)
+  dbg.init()
 	for {
 		fmt.Printf("(yabfig-dbg) ")
 		scanner.Scan()
