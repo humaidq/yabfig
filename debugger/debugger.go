@@ -269,6 +269,11 @@ func (dbg *Debugger) RunDebugger() {
 			}
 
 		} else if inputs[0] == "kill" {
+      if dbg.running {
+        dbg.running = false
+      } else {
+        fmt.Println("Cannot kill a program which is not running!")
+      }
 		} else if inputs[0] == "" || len(inputs) == 0 {
 			// No input, ignore
 		} else {
