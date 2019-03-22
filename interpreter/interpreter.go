@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const memorySize int = 500
+const memorySize int = 5000
 
 type stack []int
 
@@ -43,7 +43,7 @@ func (ipr *Interpreter) GetProperMemoryPosition() int {
 // GetProperMemoryValue returns a value from memory
 // using a corrected memory position.
 func (ipr *Interpreter) GetProperMemoryValue(pos int) int {
-  return int(ipr.Memory[pos+(memorySize/2)])
+	return int(ipr.Memory[pos+(memorySize/2)])
 }
 
 // LoadFromFile loads a program to the interpreter from
@@ -89,10 +89,7 @@ func (ipr *Interpreter) Run() {
 // IsEnded returns whether the program has
 // reached the end or not.
 func (ipr *Interpreter) IsEnded() bool {
-	if ipr.ProgramPosition > len(ipr.Program)-1 {
-		return true
-	}
-	return false
+	return ipr.ProgramPosition > len(ipr.Program)-1
 }
 
 // Clock runs one cycle/tick of the interpreter.
