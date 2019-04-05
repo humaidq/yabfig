@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const memorySize int = 5000
+const memorySize int = 30000
 
 type stack []int
 
@@ -27,7 +27,7 @@ func (s stack) pop() (stack, int) {
 type Interpreter struct {
 	Program         []byte
 	ProgramPosition int
-	Memory          [memorySize]int64
+	Memory          [memorySize]uint16
 	MemoryPosition  int
 	bracketMap      map[int]int
 	Output          strings.Builder
@@ -100,19 +100,35 @@ func (ipr *Interpreter) Clock() bool {
 	}
 	switch ipr.Program[ipr.ProgramPosition] {
 	case '>':
-		ipr.MemoryPosition++
+		if ipr.MemoryPosition == len(ipr.Memory)-1 {
+			ipr.MemoryPosition = 0
+		} else {
+			ipr.MemoryPosition++
+		}
 	case '<':
-		ipr.MemoryPosition--
+		if ipr.MemoryPosition == 0 {
+			ipr.MemoryPosition = len(ipr.Memory) - 1
+		} else {
+			ipr.MemoryPosition--
+		}
 	case '+':
-		ipr.Memory[ipr.MemoryPosition]++
+		if ipr.Memory[ipr.MemoryPosition] == 255 {
+			ipr.Memory[ipr.MemoryPosition] = 0
+		} else {
+			ipr.Memory[ipr.MemoryPosition]++
+		}
 	case '-':
-		ipr.Memory[ipr.MemoryPosition]--
+		if ipr.Memory[ipr.MemoryPosition] == 0 {
+			ipr.Memory[ipr.MemoryPosition] = 255
+		} else {
+			ipr.Memory[ipr.MemoryPosition]--
+		}
 	case '.':
 		fmt.Printf("%c", ipr.Memory[ipr.MemoryPosition])
 		ipr.Output.WriteByte(byte(ipr.Memory[ipr.MemoryPosition]))
 	case ',':
 		if len(ipr.Input) > 0 {
-			ipr.Memory[ipr.MemoryPosition] = int64(ipr.Input[0])
+			ipr.Memory[ipr.MemoryPosition] = uint16(ipr.Input[0])
 			ipr.Input = ipr.Input[1:]
 		} else {
 			fmt.Scanf("%c", &ipr.Memory[ipr.MemoryPosition])

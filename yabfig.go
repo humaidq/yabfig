@@ -13,8 +13,8 @@ func main() {
 		if args[0] == "-debug" {
 			dbg := dbg.Debugger{}
 			if len(args) > 1 {
-        dbg.SetProgram(args[len(args)-1])
-      }
+				dbg.SetProgram(args[len(args)-1])
+			}
 			dbg.RunDebugger()
 		} else {
 			ipr := bf.Interpreter{}
