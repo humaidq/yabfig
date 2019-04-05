@@ -28,7 +28,7 @@ func main() {
 	} else {
 		fmt.Println("Usage: yabfig [option] <file>")
 		fmt.Println("Options:")
-		fmt.Println("\t-lint\t\tLint (format) a Brainfuck file by removing spaces and non-instruction characters and output it to standard output.")
+		fmt.Println("\t-lint\t\tLint (format) a BF file by removing spaces and non-instruction characters and output it to standard output.")
 		fmt.Println("\t-debug\t\tRun an interactive gdb-style debugger.")
 	}
 }

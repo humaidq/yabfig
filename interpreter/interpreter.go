@@ -27,7 +27,7 @@ func (s stack) pop() (stack, int) {
 type Interpreter struct {
 	Program         []byte
 	ProgramPosition int
-	Memory          [memorySize]uint16
+	Memory          [memorySize]uint8
 	MemoryPosition  int
 	bracketMap      map[int]int
 	Output          strings.Builder
@@ -112,23 +112,15 @@ func (ipr *Interpreter) Clock() bool {
 			ipr.MemoryPosition--
 		}
 	case '+':
-		if ipr.Memory[ipr.MemoryPosition] == 255 {
-			ipr.Memory[ipr.MemoryPosition] = 0
-		} else {
-			ipr.Memory[ipr.MemoryPosition]++
-		}
+		ipr.Memory[ipr.MemoryPosition]++
 	case '-':
-		if ipr.Memory[ipr.MemoryPosition] == 0 {
-			ipr.Memory[ipr.MemoryPosition] = 255
-		} else {
-			ipr.Memory[ipr.MemoryPosition]--
-		}
+		ipr.Memory[ipr.MemoryPosition]--
 	case '.':
 		fmt.Printf("%c", ipr.Memory[ipr.MemoryPosition])
 		ipr.Output.WriteByte(byte(ipr.Memory[ipr.MemoryPosition]))
 	case ',':
 		if len(ipr.Input) > 0 {
-			ipr.Memory[ipr.MemoryPosition] = uint16(ipr.Input[0])
+			ipr.Memory[ipr.MemoryPosition] = uint8(ipr.Input[0])
 			ipr.Input = ipr.Input[1:]
 		} else {
 			fmt.Scanf("%c", &ipr.Memory[ipr.MemoryPosition])

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	bf "gitlab.com/humaid/yabfig/interpreter"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -41,6 +40,29 @@ type Debugger struct {
 	running     bool
 	breakpoints map[int]bool
 	watchpoints map[int]expression
+}
+
+type command struct {
+	commandName        []string
+	argumentLabels     string
+	commandDescription string
+	minArguments       int
+	requireRunning     bool
+	function           func(*Debugger, []string)
+}
+
+var commands = []command{
+	command{[]string{"run", "r"}, "", "Run the program", 0, false, run},
+	command{[]string{"quit", "q"}, "", "Quit the debugger", 0, false, quit},
+	command{[]string{"file", "f"}, "[path]", "Load a program from a file path", 0, false, file},
+	command{[]string{"print", "p"}, "[pos]", "Print value at memory position", 1, true, printVal},
+	command{[]string{"continue", "cont", "c"}, "", "Continue execution", 0, true, cont},
+	command{[]string{"next", "n"}, "[count]", "Execute next instruction[s]", 0, true, next},
+	command{[]string{"jump", "j"}, "[pos]", "Jump to a program position and resume", 1, true, jump},
+	command{[]string{"break", "b"}, "[pos]", "Add a breakpoint at program position", 1, false, addBreakpoint},
+	command{[]string{"clear", "cl"}, "[pos]", "Clear breakpoint at program position", 1, false, clear},
+	command{[]string{"watch", "w"}, "[n = x]", "Set watchpoint when memory position n is x", 3, false, addWatchpoint},
+	command{[]string{"kill"}, "", "Stop the program", 0, true, kill},
 }
 
 // SetProgram sets the program path for the debugger.
@@ -98,187 +120,9 @@ func (dbg *Debugger) init() {
 	dbg.watchpoints = make(map[int]expression)
 }
 
-type command struct {
-	commandName        []string
-	argumentLabels     string
-	commandDescription string
-	minArguments       int
-	requireRunning     bool
-	function           func(*Debugger, []string)
-}
-
-var commands = []command{
-	command{[]string{"run", "r"}, "", "Run the program", 0, false, run},
-	command{[]string{"quit", "q"}, "", "Quit the debugger", 0, false, quit},
-	command{[]string{"file", "f"}, "[path]", "Load a program from a file path", 0, false, file},
-	command{[]string{"print", "p"}, "[pos]", "Print value at memory position", 1, true, printVal},
-	command{[]string{"continue", "cont", "c"}, "", "Continue execution", 0, true, cont},
-	command{[]string{"next", "n"}, "[count]", "Execute next instruction[s]", 0, true, next},
-	command{[]string{"jump", "j"}, "[pos]", "Jump to a program position and resume", 1, true, jump},
-	command{[]string{"break", "b"}, "[pos]", "Add a breakpoint at program position", 1, false, addBreakpoint},
-	command{[]string{"clear", "cl"}, "[pos]", "Clear breakpoint at program position", 1, false, clear},
-	command{[]string{"watch", "w"}, "[n = x]", "Set watchpoint when memory position n is x", 3, false, addWatchpoint},
-	command{[]string{"kill"}, "", "Stop the program", 0, true, kill},
-}
-
-func quit(dbg *Debugger, _ []string) {
-	var confirm string
-	fmt.Printf("Are you sure you want to quit (y/n)? ")
-	fmt.Scanln(&confirm)
-	if strings.ToLower(confirm) == "y" {
-		os.Exit(0)
-	}
-}
-
-func run(dbg *Debugger, _ []string) {
-	if dbg.running {
-		var confirm string
-		fmt.Printf("Program is already running, do you want to start from the " +
-			"beginning (y/n)? ")
-		fmt.Scanln(&confirm)
-		if strings.ToLower(confirm) != "y" {
-			return
-		}
-	}
-	if len(dbg.programPath) == 0 {
-		fmt.Println("No program loaded! Load with `file [path]`")
-		return
-	}
-	fmt.Printf("Running program: %s\n", dbg.programPath)
-	dbg.interpreter = &bf.Interpreter{}
-	dbg.interpreter.LoadFromFile(dbg.programPath)
-	dbg.running = true
-	dbg.runClocks()
-}
-
-func printVal(dbg *Debugger, args []string) {
-	inputPos, err := strconv.Atoi(args[0])
-	if err != nil {
-		fmt.Println("Position must be an integer!")
-		return
-	}
-	value := dbg.interpreter.GetProperMemoryValue(inputPos)
-	fmt.Printf("$%d = %d (0x%08x)\n", inputPos, value, value)
-}
-
-func file(dbg *Debugger, args []string) {
-	// TODO file check
-	dbg.SetProgram(args[0])
-}
-
-func jump(dbg *Debugger, args []string) {
-	inputPos, err := strconv.Atoi(args[0])
-	if err != nil {
-		fmt.Println("Position must be an integer!")
-		return
-	}
-	dbg.interpreter.ProgramPosition = inputPos
-	dbg.runClocks()
-}
-
-func cont(dbg *Debugger, args []string) {
-	dbg.runClocks()
-}
-
-func next(dbg *Debugger, args []string) {
-	if len(args) > 0 {
-		count, err := strconv.Atoi(args[0])
-		if err != nil {
-			fmt.Println("Count must be an integer!")
-			return
-		}
-		for count > 0 && dbg.interpreter.Clock() {
-			count--
-		}
-	} else {
-		dbg.interpreter.Clock()
-	}
-}
-
-func addBreakpoint(dbg *Debugger, args []string) {
-	point, err := strconv.Atoi(args[0])
-	if err != nil {
-		fmt.Println("Breakpoint must be an integer!")
-		return
-	}
-	b, ok := dbg.breakpoints[point]
-	if ok && b {
-		fmt.Printf("Breakpoint already exists at position %d\n", point)
-	} else {
-		dbg.breakpoints[point] = true
-		fmt.Printf("Breakpoint #%d at position %d\n", len(dbg.breakpoints), point)
-	}
-}
-
-func clear(dbg *Debugger, args []string) {
-	point, err := strconv.Atoi(args[0])
-	if err != nil {
-		fmt.Println("Breakpoint must be an integer!")
-		return
-	}
-	b, ok := dbg.breakpoints[point]
-	if ok && b {
-		dbg.breakpoints[point] = false
-		fmt.Printf("Breakpoint cleared at position %d \n", point)
-	} else {
-		fmt.Printf("A breakpoint does not exist at position %d\n", point)
-	}
-}
-
-func addWatchpoint(dbg *Debugger, args []string) {
-	s := args
-	if len(s) != 3 {
-		fmt.Println("Invalid expression! 1")
-		return
-	}
-
-	n, err := strconv.Atoi(s[0])
-	x, err2 := strconv.Atoi(s[2])
-	if err != nil || err2 != nil {
-		fmt.Println("Invalid expression! 2")
-		return
-	}
-	var eq equality
-	switch s[1] {
-	case "=":
-		eq = equal
-	case "!=":
-		eq = notEqual
-	case ">":
-		eq = greater
-	case "<":
-		eq = less
-	case ">=":
-		eq = greaterEqual
-	case "<=":
-		eq = lessEqual
-	default:
-		fmt.Println("Invalid equality sign!")
-		return
-	}
-
-	dbg.watchpoints[n] = expression{eq, x}
-}
-
-func kill(dbg *Debugger, args []string) {
-	dbg.running = false
-}
-
-func getCommand(input string) *command {
-	for _, cmd := range commands {
-		for _, alias := range cmd.commandName {
-			if input == alias {
-				return &cmd
-			}
-		}
-
-	}
-	return nil
-}
-
 // RunDebugger starts the interactive debugger.
 func (dbg *Debugger) RunDebugger() {
-	fmt.Println("yabfig debugger for Brainfuck.\nCommands are similar to gdb, type \"help\" for a list of compatible commands.")
+	fmt.Println("yabfig debugger for BF.\nCommands are similar to gdb, type \"help\" for a list of compatible commands.")
 	scanner := bufio.NewScanner(os.Stdin)
 	dbg.init()
 	for {
@@ -305,7 +149,6 @@ func (dbg *Debugger) RunDebugger() {
 				}
 				fmt.Printf("%s%s \t\t %s\n", cmd.commandName[0], args, cmd.commandDescription)
 			}
-
 		}
 
 		if cmd == nil {
