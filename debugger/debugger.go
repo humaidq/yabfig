@@ -149,6 +149,7 @@ func (dbg *Debugger) RunDebugger() {
 				}
 				fmt.Printf("%s%s \t\t %s\n", cmd.commandName[0], args, cmd.commandDescription)
 			}
+      continue
 		}
 
 		if cmd == nil {
