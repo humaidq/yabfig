@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	dbg "gitlab.com/humaid/yabfig/debugger"
-	bf "gitlab.com/humaid/yabfig/interpreter"
+	dbg "git.sr.ht/~humaid/yabfig/debugger"
+	bf "git.sr.ht/~humaid/yabfig/interpreter"
 	"os"
 )
 

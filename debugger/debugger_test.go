@@ -1,7 +1,7 @@
 package debugger
 
 import (
-	bf "gitlab.com/humaid/yabfig/interpreter"
+	bf "git.sr.ht/~humaid/yabfig/interpreter"
 	"testing"
 )
 

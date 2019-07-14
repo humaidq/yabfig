@@ -24,8 +24,8 @@ via email is also accepted if preferred.
 ## 4. Download and install
 
 ```sh
-$ go get -u gitlab.com/humaid/yabfig
-$ go install gitlab.com/humaid/yabfig
+$ go get -u git.sr.ht/~humaid/yabfig
+$ go install git.sr.ht/~humaid/yabfig
 ```
 
 ## 5. Usage
