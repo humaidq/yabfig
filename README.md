@@ -1,10 +1,11 @@
-# Yet Another Brainf--k Interpreter
-
+# yabfig
 ## 1. Description
+![Screenshot](https://humaidq.ae/projects/screenshots/yabfig.jpg)
 
-yabfig is a [Brainf--k](https://en.wikipedia.org/wiki/Brainfuck) 
+yabfig is a [BF](https://en.wikipedia.org/wiki/brainfuck) 
 interpreter written in Go. It has also been extended to lint
-code (by removing un-interpreted characters) and a gdb-style debugger.
+code (by removing un-interpreted characters) and to include a gdb-style
+interpreter.
 
 ## 2. Requirements
 
@@ -16,10 +17,8 @@ The following packages must be installed on your system.
 ## 3. Copying and contributing
 
 This program is written by Humaid AlQassimi,
-and is distributed under the BSD 2 Clause license.  
-
-Contribution is currently accepted as merge requests on GitLab. Patches
-via email is also accepted if preferred.
+and is distributed under the
+[BSD 2 Clause](https://humaidq.ae/license/bsd-2-clause) license.  
 
 ## 4. Download and install
 
@@ -35,6 +34,44 @@ Usage: yabfig [option] <file>
 Options:
 	-lint		Lint (format) a Brainfuck file by removing spaces and non-instruction characters and output it to standard output.
 	-debug		Run an interactive gdb-style debugger.
+```
+To run the example program `hello-world.bf`:
+```sh
+$ yabfig programs/hello-world.bf
+```
+Using the debugger to set breakpoints:
+```sh
+$ yabfig -debug programs/hello-world.bf
+yabfig debugger for Brainfuck.
+Commands are similar to gdb, type "help" for a list of compatible commands.
+(yabfig-dbg) help
+List of commands:
+
+run -- Run the program
+print [pos] -- Print value at memory position
+next [count] -- Execute next instruction[s]
+jump [pos] -- Jump to a program position and resume
+break [pos] -- Add breakpoint at program position
+clear [pos] -- Delete breakpoint at program position
+watch [n = x] -- Set watchpoint when memory position n is x
+kill -- Kill program execution
+(yabfig-dbg) b 98
+Breakpoint #1 at position 98
+(yabfig-dbg) b 102
+Breakpoint #2 at position 102
+(yabfig-dbg) b 106
+Breakpoint #3 at position 106
+(yabfig-dbg) r
+Running program: programs/hello-world.bf
+Hello WorldBreakpoint hit at position 98
+(yabfig-dbg) c
+!Breakpoint hit at position 102
+(yabfig-dbg) c
+
+Breakpoint hit at position 106
+(yabfig-dbg) c
+Program exited
+(yabfig-dbg) 
 ```
 
 ## 6. Change log
@@ -52,13 +89,3 @@ Options:
   - Add a simple gdb-style debugger
   - Improve interpreter functions
 
-## 7. To-do
-
-- [x] Unit testing & example programs
-- [x] gdb-like debugger
-  - [x] Viewing memory
-  - [x] Stepping
-  - [x] Breakpoints
-  - [ ] Ignore
-  - [ ] View source
-- [ ] A web interface with debugger and visualiser
